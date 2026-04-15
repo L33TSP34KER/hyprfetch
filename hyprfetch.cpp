@@ -6,54 +6,59 @@
 #include <sys/utsname.h>
 #include <unistd.h>
 
-const std::string CBK = "\033[30m";
-const std::string CRE = "\033[31m";
-const std::string CGR = "\033[32m";
-const std::string CYE = "\033[33m";
-const std::string CBL = "\033[34m";
-const std::string CMA = "\033[35m";
-const std::string CCY = "\033[36m";
-const std::string CWH = "\033[37m";
-const std::string CBD = "\033[1m";
-const std::string CNC = "\033[0m";
+using namespace std;
 
-std::string execCmd(const char *cmd) {
-  std::array<char, 128> buffer;
-  std::string result;
-  std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
-  if (!pipe)
-    return "";
-  while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
-    result += buffer.data();
-  }
-  if (!result.empty() && result[result.length() - 1] == '\n') {
-    result.erase(result.length() - 1);
-  }
-  return result;
+// Constantes de couleur
+const string CBK = "\033[30m";
+const string CRE = "\033[31m";
+const string CGR = "\033[32m";
+const string CYE = "\033[33m";
+const string CBL = "\033[34m";
+const string CMA = "\033[35m";
+const string CCY = "\033[36m";
+const string CWH = "\033[37m";
+const string CBD = "\033[1m";
+const string CNC = "\033[0m";
+
+string execCmd(const char* cmd) {
+    array<char, 128> buffer;
+    string result;
+    unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+
+    if (!pipe) return "";
+
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+        result += buffer.data();
+    }
+
+    if (!result.empty() && result.back() == '\n') {
+        result.pop_back();
+    }
+
+    return result;
 }
 
-std::string draw(int perc, int size) {
-  std::string FULL = "━";
-  std::string EMPTY = "━";
-  std::string out;
-  int inc = perc * size / 100;
+string draw(int perc, int size) {
+    const string FULL = "━";
+    const string EMPTY = "━";
+    string out;
+    int inc = perc * size / 100;
 
-  for (int v = 0; v < size; v++) {
-    if (v <= inc)
-      out += CMA + FULL;
-    else
-      out += CWH + EMPTY;
-  }
-  return out;
+    for (int v = 0; v < size; v++) {
+        out += (v <= inc) ? CMA + FULL : CWH + EMPTY;
+    }
+
+    return out;
 }
 
-std::string getColorBar() {
-  std::string c = "\033[0m\033[31m░▒";
-  for (int i = 1; i <= 6; i++) {
-    c += "\033[" + std::to_string(i + 41) + "m\033[" + std::to_string(i + 30) +
-         "m█▓▒░";
-  }
-  return c + "\033[37m█\033[0m▒░";
+string getColorBar() {
+    string c = "\033[0m\033[31m░▒";
+
+    for (int i = 1; i <= 6; i++) {
+        c += "\033[" + to_string(i + 41) + "m\033[" + to_string(i + 30) + "m█▓▒░";
+    }
+
+    return c + "\033[37m█\033[0m▒░";
 }
 
 int main() {
